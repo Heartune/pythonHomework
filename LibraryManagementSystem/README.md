@@ -68,13 +68,21 @@ beautifulsoup4==4.13.3
    python database/db_manager.py
    ```
 
-4. Start the server:
+4. Run as a package:
    ```
-   python server/main.py
+   # Start the server
+   python -m LibraryManagementSystem server
+   
+   # Start the client
+   python -m LibraryManagementSystem client
    ```
 
-5. Start the client application:
+   Alternatively, you can run the components directly:
    ```
+   # Start the server
+   python server/main.py
+   
+   # Start the client
    python client/main.py
    ```
 
