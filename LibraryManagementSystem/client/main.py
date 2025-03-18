@@ -5,12 +5,41 @@ Client entry point for the Library Management System.
 import sys
 import os
 from PyQt5.QtWidgets import QApplication
-from .gui.login_window import LoginWindow
-from .gui.admin_window import AdminWindow
-from .gui.user_window import UserWindow
-from .network.client import Client
-from utils.logger import get_logger
-from utils.config import SERVER_HOST, SERVER_PORT
+import importlib.util
+
+# Add project root to path for direct execution
+if __name__ == '__main__':
+    import sys
+    import os
+    project_root = os.path.abspath(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    if project_root not in sys.path:
+        sys.path.insert(0, project_root)
+
+# Try absolute imports first (when running as a package)
+try:
+    from LibraryManagementSystem.client.gui.login_window import LoginWindow
+    from LibraryManagementSystem.client.gui.admin_window import AdminWindow
+    from LibraryManagementSystem.client.gui.user_window import UserWindow
+    from LibraryManagementSystem.client.network.client import Client
+    from LibraryManagementSystem.utils.logger import get_logger
+    from LibraryManagementSystem.utils.config import SERVER_HOST, SERVER_PORT
+except ImportError:
+    # Fall back to relative imports (when running directly)
+    try:
+        from client.gui.login_window import LoginWindow
+        from client.gui.admin_window import AdminWindow
+        from client.gui.user_window import UserWindow
+        from client.network.client import Client
+        from utils.logger import get_logger
+        from utils.config import SERVER_HOST, SERVER_PORT
+    except ImportError:
+        # Last resort: try relative import
+        from .gui.login_window import LoginWindow
+        from .gui.admin_window import AdminWindow
+        from .gui.user_window import UserWindow
+        from .network.client import Client
+        from utils.logger import get_logger
+        from utils.config import SERVER_HOST, SERVER_PORT
 
 logger = get_logger(__name__)
 

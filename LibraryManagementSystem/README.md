@@ -65,7 +65,16 @@ beautifulsoup4==4.13.3
 
 3. Initialize the database:
    ```
+   # On Linux/Mac:
    python database/db_manager.py
+   
+   # On Windows:
+   # Option 1: Set PYTHONPATH first
+   set PYTHONPATH=path\to\LibraryManagementSystem
+   python database\db_manager.py
+   
+   # Option 2: Run as a module
+   python -m LibraryManagementSystem.database.db_manager
    ```
 
 4. Run as a package:
@@ -79,11 +88,19 @@ beautifulsoup4==4.13.3
 
    Alternatively, you can run the components directly:
    ```
-   # Start the server
+   # On Linux/Mac:
    python server/main.py
-   
-   # Start the client
    python client/main.py
+   
+   # On Windows:
+   # Option 1: Set PYTHONPATH first
+   set PYTHONPATH=path\to\LibraryManagementSystem
+   python server\main.py
+   python client\main.py
+   
+   # Option 2: Run as modules
+   python -m LibraryManagementSystem.server.main
+   python -m LibraryManagementSystem.client.main
    ```
 
 ## Usage
