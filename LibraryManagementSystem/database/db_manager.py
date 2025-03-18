@@ -5,8 +5,23 @@ Database connection manager for the Library Management System.
 import sqlite3
 import threading
 import os
-from utils.logger import get_logger
-from utils.config import DATABASE_PATH, DATABASE_TIMEOUT
+import importlib.util
+
+# Try absolute imports first (when running as a package)
+try:
+    from LibraryManagementSystem.utils.logger import get_logger
+    from LibraryManagementSystem.utils.config import DATABASE_PATH, DATABASE_TIMEOUT
+except ImportError:
+    # Fall back to relative imports (when running directly)
+    try:
+        from utils.logger import get_logger
+        from utils.config import DATABASE_PATH, DATABASE_TIMEOUT
+    except ImportError:
+        import sys
+        # Add project root to path
+        sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+        from utils.logger import get_logger
+        from utils.config import DATABASE_PATH, DATABASE_TIMEOUT
 
 logger = get_logger(__name__)
 

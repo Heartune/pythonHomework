@@ -5,10 +5,35 @@ Server entry point for the Library Management System.
 import sys
 import os
 import threading
-from .network.server import Server
-from utils.logger import get_logger
-from utils.config import SERVER_HOST, SERVER_PORT, MAX_CONNECTIONS
-from database.db_manager import initialize_database
+import importlib.util
+
+# Add project root to path for direct execution
+if __name__ == '__main__':
+    import sys
+    import os
+    project_root = os.path.abspath(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    if project_root not in sys.path:
+        sys.path.insert(0, project_root)
+
+# Try absolute imports first (when running as a package)
+try:
+    from LibraryManagementSystem.server.network.server import Server
+    from LibraryManagementSystem.utils.logger import get_logger
+    from LibraryManagementSystem.utils.config import SERVER_HOST, SERVER_PORT, MAX_CONNECTIONS
+    from LibraryManagementSystem.database.db_manager import initialize_database
+except ImportError:
+    # Fall back to relative imports (when running directly)
+    try:
+        from server.network.server import Server
+        from utils.logger import get_logger
+        from utils.config import SERVER_HOST, SERVER_PORT, MAX_CONNECTIONS
+        from database.db_manager import initialize_database
+    except ImportError:
+        # Last resort: try relative import for server only
+        from .network.server import Server
+        from utils.logger import get_logger
+        from utils.config import SERVER_HOST, SERVER_PORT, MAX_CONNECTIONS
+        from database.db_manager import initialize_database
 
 logger = get_logger(__name__)
 

@@ -4,7 +4,16 @@ Logging utility for the Library Management System.
 
 import logging
 import os
-from .config import LOG_LEVEL, LOG_FILE
+
+# Try absolute imports first (when running as a package)
+try:
+    from LibraryManagementSystem.utils.config import LOG_LEVEL, LOG_FILE
+except ImportError:
+    # Fall back to relative imports (when running directly)
+    try:
+        from utils.config import LOG_LEVEL, LOG_FILE
+    except ImportError:
+        from .config import LOG_LEVEL, LOG_FILE
 
 # Create logs directory if it doesn't exist
 os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)

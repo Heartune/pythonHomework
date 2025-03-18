@@ -16,7 +16,9 @@ import argparse
 from utils.logger import get_logger
 
 # Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+project_root = os.path.abspath(os.path.dirname(__file__))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
 logger = get_logger(__name__)
 
