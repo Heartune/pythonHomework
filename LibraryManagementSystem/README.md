@@ -41,14 +41,14 @@ A comprehensive library management system with user authentication, database, ne
 
 ### Dependencies
 ```
-matplotlib==3.10.1
-numpy==2.2.4
-pandas==2.2.3
-PyQt5==5.15.11
-requests==2.32.3
-scikit-learn==1.6.1
-seaborn==0.13.2
-beautifulsoup4==4.13.3
+PyQt5>=5.15.0
+matplotlib>=3.5.0
+numpy>=1.20.0
+pandas>=1.3.0
+requests>=2.25.0
+scikit-learn>=1.0.0
+seaborn>=0.11.0
+beautifulsoup4>=4.9.0
 ```
 
 ### Setup Instructions
