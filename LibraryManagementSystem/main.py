@@ -1,11 +1,22 @@
 """
 Main entry point for the Library Management System.
+
+This module allows running the application as a package from the project's root directory.
+Usage:
+    # Start the server
+    python -m LibraryManagementSystem server
+    
+    # Start the client
+    python -m LibraryManagementSystem client
 """
 
 import sys
 import os
 import argparse
 from utils.logger import get_logger
+
+# Add the project root to the Python path
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 logger = get_logger(__name__)
 
