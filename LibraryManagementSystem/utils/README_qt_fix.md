@@ -15,6 +15,9 @@ This module provides two ways to fix the issue:
 
 1. **Import the module before creating QApplication**:
    ```python
+   # When running as a package
+   import LibraryManagementSystem.utils.fix_qt_font_error
+   # When running directly
    import utils.fix_qt_font_error
    from PyQt5.QtWidgets import QApplication
    app = QApplication(sys.argv)
@@ -22,6 +25,9 @@ This module provides two ways to fix the issue:
 
 2. **Use the provided wrapper function**:
    ```python
+   # When running as a package
+   from LibraryManagementSystem.utils.fix_qt_font_error import create_application
+   # When running directly
    from utils.fix_qt_font_error import create_application
    app = create_application(sys.argv)
    ```

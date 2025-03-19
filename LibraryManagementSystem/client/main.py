@@ -4,8 +4,18 @@ Client entry point for the Library Management System.
 
 import sys
 import os
-from utils.fix_qt_font_error import create_application  # Import the fix
 import importlib.util
+
+# Try absolute imports first (when running as a package)
+try:
+    from LibraryManagementSystem.utils.fix_qt_font_error import create_application
+except ImportError:
+    # Fall back to relative imports (when running directly)
+    try:
+        from utils.fix_qt_font_error import create_application
+    except ImportError:
+        # Last resort: try relative import
+        from .utils.fix_qt_font_error import create_application
 
 # Add project root to path for direct execution
 if __name__ == '__main__':

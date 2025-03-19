@@ -9,13 +9,12 @@ Usage:
 2. Or use the provided wrapper function to create the QApplication
 
 Example:
-    import fix_qt_font_error
-    from PyQt5.QtWidgets import QApplication
-    app = QApplication(sys.argv)
+    # When running as a package
+    from LibraryManagementSystem.utils.fix_qt_font_error import create_application
+    app = create_application(sys.argv)
     
-    # OR
-    
-    from fix_qt_font_error import create_application
+    # OR when running directly
+    from utils.fix_qt_font_error import create_application
     app = create_application(sys.argv)
 """
 
