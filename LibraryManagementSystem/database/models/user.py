@@ -60,8 +60,8 @@ class User:
             role=row['role'],
             full_name=row['full_name'],
             email=row['email'],
-            phone=row.get('phone'),
-            address=row.get('address'),
+            phone=row['phone'] if 'phone' in row.keys() else None,
+            address=row['address'] if 'address' in row.keys() else None,
             created_at=row['created_at'],
             updated_at=row['updated_at']
         )
