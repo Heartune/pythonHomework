@@ -123,8 +123,12 @@ class ClientHandler(threading.Thread):
                 'data': {}
             }
             
+            # Handle ping action
+            if action == 'ping':
+                response['success'] = True
+                response['message'] = 'Pong'
             # Handle authentication actions
-            if action == 'login':
+            elif action == 'login':
                 success, message, user_data = handle_login(data.get('username'), data.get('password'))
                 response['success'] = success
                 response['message'] = message
@@ -144,13 +148,33 @@ class ClientHandler(threading.Thread):
                     self.role = None
                     self.token = None
             # Handle book-related actions
-            elif action.startswith('book_'):
+            elif action == 'book_get_all':
+                # Special case for book_get_all
+                # Include token in data for authentication
+                data['token'] = token
+                success, message, result_data = handle_book_request('book_get_all', data, token)
+                response['success'] = success
+                response['message'] = message
+                response['data'] = result_data
+                # Log the response for debugging
+                logger.info(f"Book get all response: success={success}, message={message}, data_length={len(result_data) if result_data else 0}, token={token}")
+            elif isinstance(action, str) and action.startswith('book_'):
                 success, message, result_data = handle_book_request(action, data, token)
                 response['success'] = success
                 response['message'] = message
                 response['data'] = result_data
             # Handle user-related actions
-            elif action.startswith('user_'):
+            elif action == 'get_users' or action == 'user_get_all':
+                # Special case for get_users
+                # Include token in data for authentication
+                data['token'] = token
+                success, message, result_data = handle_user_request('user_get_all', data, token)
+                response['success'] = success
+                response['message'] = message
+                response['data'] = result_data
+                # Log the response for debugging
+                logger.info(f"User get all response: success={success}, message={message}, data_length={len(result_data) if result_data else 0}, token={token}")
+            elif isinstance(action, str) and action.startswith('user_'):
                 success, message, result_data = handle_user_request(action, data, token)
                 response['success'] = success
                 response['message'] = message

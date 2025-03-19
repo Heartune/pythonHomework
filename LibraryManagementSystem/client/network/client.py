@@ -76,13 +76,13 @@ class Client:
                 self.socket = None
                 logger.info("Disconnected from server")
     
-    def send_request(self, action, data=None, callback=None):
+    def send_request(self, action_or_request, data=None, callback=None):
         """
         Send a request to the server.
         
         Args:
-            action (str): The action to perform.
-            data (dict, optional): The data to send.
+            action_or_request (str or dict): The action to perform or a complete request dict.
+            data (dict, optional): The data to send if action_or_request is a string.
             callback (callable, optional): A callback function to call when a response is received.
             
         Returns:
@@ -93,12 +93,24 @@ class Client:
             return False
         
         try:
-            # Prepare the request
-            request = {
-                'action': action,
-                'data': data or {},
-                'token': self.token
-            }
+            # Handle the case where callback is passed as the second argument
+            if callable(data) and callback is None:
+                callback = data
+                data = None
+            
+            # Prepare the request based on input type
+            if isinstance(action_or_request, dict):
+                # If a complete request dict was provided
+                request = action_or_request.copy()
+                if 'token' not in request and self.token:
+                    request['token'] = self.token
+            else:
+                # If action and data were provided separately
+                request = {
+                    'action': action_or_request,
+                    'data': data or {},
+                    'token': self.token
+                }
             
             # Generate a request ID
             request_id = str(int(time.time() * 1000))
@@ -108,8 +120,12 @@ class Client:
             if callback:
                 self.callbacks[request_id] = callback
             
-            # Encode the request
-            request_json = json.dumps(request)
+            # Encode the request (exclude callback and any function objects from serialization)
+            request_data = {}
+            for k, v in request.items():
+                if k != 'callback' and not callable(v):
+                    request_data[k] = v
+            request_json = json.dumps(request_data)
             request_bytes = request_json.encode('utf-8')
             
             # Send the request length first (4 bytes)
@@ -119,7 +135,7 @@ class Client:
             # Send the request
             self.socket.sendall(request_bytes)
             
-            logger.debug(f"Sent request: {action}")
+            logger.debug(f"Sent request: {request_data.get('action')}")
             return True
         except Exception as e:
             logger.error(f"Error sending request: {e}")
@@ -145,9 +161,26 @@ class Client:
         
         return self.send_request('login', data, callback)
     
-    def logout(self, callback=None):
+    def logout(self, token=None, callback=None):
         """
         Log out from the server.
+        
+        Args:
+            token (str, optional): The authentication token. If not provided, uses the stored token.
+            callback (callable, optional): A callback function to call when a response is received.
+            
+        Returns:
+            bool: True if the request was sent successfully, False otherwise.
+        """
+        # Use the stored token if none is provided
+        if token is None:
+            token = self.token
+            
+        return self.send_request('logout', {}, callback)
+        
+    def ping(self, callback=None):
+        """
+        Send a ping request to the server to check connectivity.
         
         Args:
             callback (callable, optional): A callback function to call when a response is received.
@@ -155,7 +188,235 @@ class Client:
         Returns:
             bool: True if the request was sent successfully, False otherwise.
         """
-        return self.send_request('logout', {}, callback)
+        return self.send_request('ping', {}, callback)
+        
+    def get_books(self, token=None, callback=None):
+        """
+        Get all books from the server.
+        
+        Args:
+            token (str, optional): The authentication token. If not provided, uses the stored token.
+            callback (callable, optional): A callback function to call when a response is received.
+            
+        Returns:
+            bool: True if the request was sent successfully, False otherwise.
+        """
+        # Use the stored token if none is provided
+        if token is None:
+            token = self.token
+            
+        # Create a request with the token explicitly in the data
+        data = {'token': token}
+        
+        # Use the action string directly
+        return self.send_request('book_get_all', data, callback)
+        
+    def get_users(self, token=None, callback=None):
+        """
+        Get all users from the server.
+        
+        Args:
+            token (str, optional): The authentication token. If not provided, uses the stored token.
+            callback (callable, optional): A callback function to call when a response is received.
+            
+        Returns:
+            bool: True if the request was sent successfully, False otherwise.
+        """
+        # Use the stored token if none is provided
+        if token is None:
+            token = self.token
+            
+        # Create a request with the token explicitly in the data
+        data = {'token': token}
+        
+        # Use the action string directly
+        return self.send_request('user_get_all', data, callback)
+        
+    def get_user(self, user_id, token=None, callback=None):
+        """
+        Get a specific user from the server.
+        
+        Args:
+            user_id (int): The ID of the user to get.
+            token (str, optional): The authentication token. If not provided, uses the stored token.
+            callback (callable, optional): A callback function to call when a response is received.
+            
+        Returns:
+            bool: True if the request was sent successfully, False otherwise.
+        """
+        # Use the stored token if none is provided
+        if token is None:
+            token = self.token
+            
+        # Create a request with the user ID and token
+        data = {
+            'user_id': user_id,
+            'token': token
+        }
+        
+        return self.send_request('user_get', data, callback)
+        
+    def create_user(self, user_data, token=None, callback=None):
+        """
+        Create a new user on the server.
+        
+        Args:
+            user_data (dict): The user data.
+            token (str, optional): The authentication token. If not provided, uses the stored token.
+            callback (callable, optional): A callback function to call when a response is received.
+            
+        Returns:
+            bool: True if the request was sent successfully, False otherwise.
+        """
+        # Use the stored token if none is provided
+        if token is None:
+            token = self.token
+            
+        # Create a request with the user data
+        data = {'data': user_data}
+        
+        return self.send_request('user_create', data, callback)
+        
+    def update_user(self, user_id, user_data, token=None, callback=None):
+        """
+        Update a user on the server.
+        
+        Args:
+            user_id (int): The ID of the user to update.
+            user_data (dict): The updated user data.
+            token (str, optional): The authentication token. If not provided, uses the stored token.
+            callback (callable, optional): A callback function to call when a response is received.
+            
+        Returns:
+            bool: True if the request was sent successfully, False otherwise.
+        """
+        # Use the stored token if none is provided
+        if token is None:
+            token = self.token
+            
+        # Create a request with the user data in the 'user' field
+        request = {
+            'action': 'user_update',
+            'token': token,
+            'user_id': user_id,
+            'user': user_data
+        }
+        
+        return self.send_request(request, callback)
+        
+    def delete_user(self, user_id, token=None, callback=None):
+        """
+        Delete a user from the server.
+        
+        Args:
+            user_id (int): The ID of the user to delete.
+            token (str, optional): The authentication token. If not provided, uses the stored token.
+            callback (callable, optional): A callback function to call when a response is received.
+            
+        Returns:
+            bool: True if the request was sent successfully, False otherwise.
+        """
+        # Use the stored token if none is provided
+        if token is None:
+            token = self.token
+            
+        # Create a request with the user ID
+        data = {'user_id': user_id}
+        
+        return self.send_request('user_delete', data, callback)
+        
+    def get_book(self, book_id, token=None, callback=None):
+        """
+        Get a specific book from the server.
+        
+        Args:
+            book_id (int): The ID of the book to get.
+            token (str, optional): The authentication token. If not provided, uses the stored token.
+            callback (callable, optional): A callback function to call when a response is received.
+            
+        Returns:
+            bool: True if the request was sent successfully, False otherwise.
+        """
+        # Use the stored token if none is provided
+        if token is None:
+            token = self.token
+            
+        # Create a request with the book ID and token
+        data = {
+            'book_id': book_id,
+            'token': token
+        }
+        
+        return self.send_request('book_get', data, callback)
+        
+    def create_book(self, book_data, token=None, callback=None):
+        """
+        Create a new book on the server.
+        
+        Args:
+            book_data (dict): The book data.
+            token (str, optional): The authentication token. If not provided, uses the stored token.
+            callback (callable, optional): A callback function to call when a response is received.
+            
+        Returns:
+            bool: True if the request was sent successfully, False otherwise.
+        """
+        # Use the stored token if none is provided
+        if token is None:
+            token = self.token
+            
+        # Create a request with the book data
+        data = {'data': book_data}
+        
+        return self.send_request('book_create', data, callback)
+        
+    def update_book(self, book_id, book_data, token=None, callback=None):
+        """
+        Update a book on the server.
+        
+        Args:
+            book_id (int): The ID of the book to update.
+            book_data (dict): The updated book data.
+            token (str, optional): The authentication token. If not provided, uses the stored token.
+            callback (callable, optional): A callback function to call when a response is received.
+            
+        Returns:
+            bool: True if the request was sent successfully, False otherwise.
+        """
+        # Use the stored token if none is provided
+        if token is None:
+            token = self.token
+            
+        # Create a request with the book data in the 'book' field
+        request = {
+            'action': 'book_update',
+            'token': token,
+            'book_id': book_id,
+            'book': book_data
+        }
+        
+        return self.send_request(request, callback)
+        
+    def delete_book(self, book_id, token=None, callback=None):
+        """
+        Delete a book from the server.
+        
+        Args:
+            book_id (int): The ID of the book to delete.
+            token (str, optional): The authentication token. If not provided, uses the stored token.
+            callback (callable, optional): A callback function to call when a response is received.
+            
+        Returns:
+            bool: True if the request was sent successfully, False otherwise.
+        """
+        # Use the stored token if none is provided
+        if token is None:
+            token = self.token
+            
+        # Create a request with the book ID
+        data = {'book_id': book_id}
+        
+        return self.send_request('book_delete', data, callback)
     
     def _receive_loop(self):
         """Receive loop for handling server responses."""
