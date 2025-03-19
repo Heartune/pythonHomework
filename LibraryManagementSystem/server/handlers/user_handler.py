@@ -37,14 +37,15 @@ def handle_user_request(action, data, token):
             if role != 'admin':
                 return False, "Admin privileges required", {}
             
-            # Extract user data
-            username = data.get('username')
-            password = data.get('password')
-            role_new = data.get('role', 'user')
-            full_name = data.get('full_name')
-            email = data.get('email')
-            phone = data.get('phone')
-            address = data.get('address')
+            # Extract user data from the data field
+            user_data = data.get('data', {})
+            username = user_data.get('username')
+            password = user_data.get('password')
+            role_new = user_data.get('role', 'user')
+            full_name = user_data.get('full_name')
+            email = user_data.get('email')
+            phone = user_data.get('phone')
+            address = user_data.get('address')
             
             # Validate required fields
             if not username or not password or not full_name or not email:
@@ -114,13 +115,17 @@ def handle_user_request(action, data, token):
         elif action == 'user_update':
             # Extract user data
             target_user_id = data.get('user_id')
-            username = data.get('username')
-            password = data.get('password')
-            role_new = data.get('role')
-            full_name = data.get('full_name')
-            email = data.get('email')
-            phone = data.get('phone')
-            address = data.get('address')
+            user_data = data.get('data', {})
+            user = data.get('user', {})
+            
+            # Try to get data from both possible sources
+            username = user.get('username') or user_data.get('username')
+            password = user.get('password') or user_data.get('password')
+            role_new = user.get('role') or user_data.get('role')
+            full_name = user.get('full_name') or user_data.get('full_name')
+            email = user.get('email') or user_data.get('email')
+            phone = user.get('phone') or user_data.get('phone')
+            address = user.get('address') or user_data.get('address')
             
             if not target_user_id:
                 return False, "User ID is required", {}

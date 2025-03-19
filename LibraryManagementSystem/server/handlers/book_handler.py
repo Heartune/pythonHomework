@@ -39,15 +39,16 @@ def handle_book_request(action, data, token):
             if role != 'admin':
                 return False, "Admin privileges required", {}
             
-            # Extract book data
-            title = data.get('title')
-            author = data.get('author')
-            isbn = data.get('isbn')
-            publisher = data.get('publisher')
-            publication_year = data.get('publication_year')
-            category = data.get('category')
-            description = data.get('description')
-            quantity = data.get('quantity', 1)
+            # Extract book data from the data field
+            book_data = data.get('data', {})
+            title = book_data.get('title')
+            author = book_data.get('author')
+            isbn = book_data.get('isbn')
+            publisher = book_data.get('publisher')
+            publication_year = book_data.get('publication_year')
+            category = book_data.get('category')
+            description = book_data.get('description')
+            quantity = book_data.get('quantity', 1)
             
             # Validate required fields
             if not title or not author or not isbn:
@@ -101,7 +102,13 @@ def handle_book_request(action, data, token):
             # Get all books
             books = get_all_books()
             
-            return True, f"{len(books)} books retrieved", [book.to_dict() for book in books]
+            # Convert books to dict format
+            book_dicts = [book.to_dict() for book in books]
+            
+            # Log for debugging
+            logger.info(f"Retrieved {len(books)} books with token {token}")
+            
+            return True, f"{len(books)} books retrieved", book_dicts
         
         elif action == 'book_search':
             # Extract search parameters
@@ -123,14 +130,21 @@ def handle_book_request(action, data, token):
             
             # Extract book data
             book_id = data.get('book_id')
-            title = data.get('title')
-            author = data.get('author')
-            isbn = data.get('isbn')
-            publisher = data.get('publisher')
-            publication_year = data.get('publication_year')
-            category = data.get('category')
-            description = data.get('description')
-            quantity = data.get('quantity')
+            book_data = data.get('data', {})
+            book = data.get('book', {})
+            
+            # Log the incoming data for debugging
+            logger.info(f"Book update request: book_id={book_id}, book={book}, data={book_data}")
+            
+            # Try to get data from both possible sources
+            title = book.get('title') or book_data.get('title')
+            author = book.get('author') or book_data.get('author')
+            isbn = book.get('isbn') or book_data.get('isbn')
+            publisher = book.get('publisher') or book_data.get('publisher')
+            publication_year = book.get('publication_year') or book_data.get('publication_year')
+            category = book.get('category') or book_data.get('category')
+            description = book.get('description') or book_data.get('description')
+            quantity = book.get('quantity') or book_data.get('quantity')
             
             if not book_id:
                 return False, "Book ID is required", {}
