@@ -152,17 +152,12 @@ class LoginWindow(QWidget):
             # Get user data
             user_data = response.get('data', {})
             
-            # Check if the user has the selected role
-            selected_role = self.role_combo.currentText().lower()
+            # Get user role from response
             user_role = user_data.get('role', '')
             
-            if selected_role != user_role:
-                QMessageBox.warning(
-                    self, 
-                    'Login Error', 
-                    f'You do not have {selected_role} privileges.'
-                )
-                return
+            # No need to check selected role against actual role
+            # Just log the role information
+            logger.debug(f"User logged in with role: {user_role}")
             
             # Emit login successful signal
             self.login_successful.emit(user_data)

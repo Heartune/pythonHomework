@@ -107,8 +107,8 @@ def verify_authentication(token, required_role=None):
         if not payload:
             return False, None, None
         
-        user_id = payload.get('user_id')
-        role = payload.get('role')
+        user_id = payload['user_id'] if 'user_id' in payload else None
+        role = payload['role'] if 'role' in payload else None
         
         # Check if the user has the required role
         if required_role and role != required_role:

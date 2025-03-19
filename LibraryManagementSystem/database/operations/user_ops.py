@@ -252,10 +252,13 @@ def authenticate_user(username, password):
     """
     try:
         user = get_user_by_username(username)
+        logger.debug(f"Authentication attempt for user '{username}': User found = {user is not None}")
         
         if user and user.verify_password(password):
+            logger.debug(f"Password verification successful for user '{username}'")
             return user
         
+        logger.debug(f"Password verification failed for user '{username}'")
         return None
     except Exception as e:
         logger.error(f"Error authenticating user: {e}")
