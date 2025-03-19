@@ -7,12 +7,17 @@ import json
 import threading
 import time
 import ssl
+from PyQt5.QtCore import QObject, pyqtSignal
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-class Client:
+class Client(QObject):
     """Client for communicating with the server."""
+    
+    # Define signals for thread-safe communication
+    response_received = pyqtSignal(dict)
+    connection_lost = pyqtSignal()
     
     def __init__(self, host, port):
         """
@@ -22,6 +27,7 @@ class Client:
             host (str): The server host.
             port (int): The server port.
         """
+        super().__init__()
         self.host = host
         self.port = port
         self.socket = None
@@ -116,9 +122,9 @@ class Client:
             request_id = str(int(time.time() * 1000))
             request['request_id'] = request_id
             
-            # Register the callback
+            # Register the callback using the new method
             if callback:
-                self.callbacks[request_id] = callback
+                self.register_callback(request_id, callback)
             
             # Encode the request (exclude callback and any function objects from serialization)
             request_data = {}
@@ -178,6 +184,27 @@ class Client:
             
         return self.send_request('logout', {}, callback)
         
+    def register_callback(self, request_id, callback):
+        """
+        Register a callback for a specific request ID.
+        
+        Args:
+            request_id (str): The request ID.
+            callback (callable): The callback function.
+        """
+        self.callbacks[request_id] = callback
+        
+        # Connect a one-time handler for this request
+        def handle_response(response):
+            if response.get('request_id') == request_id:
+                # Call the callback
+                callback(response)
+                # Disconnect this handler
+                self.response_received.disconnect(handle_response)
+        
+        # Connect the handler
+        self.response_received.connect(handle_response)
+    
     def ping(self, callback=None):
         """
         Send a ping request to the server to check connectivity.
@@ -479,13 +506,8 @@ class Client:
             # Extract the request ID
             request_id = response.get('request_id')
             
-            # Check if we have a callback for this request
-            if request_id and request_id in self.callbacks:
-                callback = self.callbacks[request_id]
-                del self.callbacks[request_id]
-                
-                # Call the callback
-                callback(response)
+            # Emit the response signal to be handled in the main thread
+            self.response_received.emit(response)
             
             # Handle authentication responses
             if response.get('action') == 'login' and response.get('success'):
