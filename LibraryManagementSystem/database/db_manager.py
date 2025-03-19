@@ -60,9 +60,16 @@ def close_connection():
 def initialize_database():
     """Initialize the database with the required tables."""
     try:
+        print("="*80)
+        print("DATABASE INITIALIZATION STARTED")
+        print(f"Database path: {DATABASE_PATH}")
+        print(f"Current working directory: {os.getcwd()}")
+        print("-"*80)
+        
         conn = get_connection()
         cursor = conn.cursor()
         
+        print("Creating users table...")
         # Create users table
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
@@ -78,7 +85,9 @@ def initialize_database():
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         ''')
+        print("✓ Users table created successfully")
         
+        print("Creating books table...")
         # Create books table
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS books (
@@ -96,7 +105,9 @@ def initialize_database():
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         ''')
+        print("✓ Books table created successfully")
         
+        print("Creating transactions table...")
         # Create transactions table
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS transactions (
@@ -111,7 +122,9 @@ def initialize_database():
             FOREIGN KEY (book_id) REFERENCES books (book_id)
         )
         ''')
+        print("✓ Transactions table created successfully")
         
+        print("Creating database triggers...")
         # Create a trigger to update the 'updated_at' field in users table
         cursor.execute('''
         CREATE TRIGGER IF NOT EXISTS update_users_timestamp
@@ -153,17 +166,30 @@ def initialize_database():
             UPDATE books SET available = available + 1 WHERE book_id = NEW.book_id;
         END;
         ''')
+        print("✓ Database triggers created successfully")
         
+        print("Inserting default admin user...")
         # Insert admin user if not exists
         cursor.execute('''
         INSERT OR IGNORE INTO users (username, password, role, full_name, email)
         VALUES ('admin', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'admin', 'Administrator', 'admin@library.com')
         ''')
+        print("✓ Default admin user created successfully")
         
         conn.commit()
+        print("-"*80)
+        print("DATABASE INITIALIZATION COMPLETED SUCCESSFULLY")
+        print("="*80)
         logger.info("Database initialized successfully")
     except Exception as e:
+        print("!"*80)
+        print(f"ERROR INITIALIZING DATABASE: {e}")
+        print("!"*80)
         logger.error(f"Error initializing database: {e}")
         raise
     finally:
         close_connection()
+
+if __name__ == '__main__':
+    # Execute database initialization when script is run directly
+    initialize_database()
