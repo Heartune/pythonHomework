@@ -4,7 +4,7 @@ Client entry point for the Library Management System.
 
 import sys
 import os
-from PyQt5.QtWidgets import QApplication
+from utils.fix_qt_font_error import create_application  # Import the fix
 import importlib.util
 
 # Add project root to path for direct execution
@@ -50,7 +50,7 @@ def main():
         client = Client(SERVER_HOST, SERVER_PORT)
         
         # Create the Qt application
-        app = QApplication(sys.argv)
+        app = create_application(sys.argv)  # Use the fixed application creator
         
         # Create the login window
         login_window = LoginWindow(client)
