@@ -58,7 +58,7 @@ class Transaction:
             book_id=row['book_id'],
             borrow_date=row['borrow_date'],
             due_date=row['due_date'],
-            return_date=row.get('return_date'),
+            return_date=row['return_date'] if 'return_date' in row.keys() else None,
             status=row['status']
         )
     
